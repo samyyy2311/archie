@@ -13,7 +13,8 @@ data class Tab(
     val canGoForward: Boolean = false,
     val loadingProgress: Int = 0,
     val isLoading: Boolean = false,
-    val isDesktopMode: Boolean = false
+    val isDesktopMode: Boolean = false,
+    val themeColor: Long? = null
 )
 
 data class BrowserState(
@@ -22,6 +23,7 @@ data class BrowserState(
     val isSearchOpen: Boolean = false,
     val isTabSwitcherOpen: Boolean = false,
     val isMenuOpen: Boolean = false,
+    val isBrowseForMe: Boolean = false,
     val customFullscreenView: View? = null,
     val isOmniboxVisible: Boolean = true
 ) {

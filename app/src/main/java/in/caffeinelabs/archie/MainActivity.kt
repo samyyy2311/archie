@@ -7,6 +7,11 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -61,15 +66,15 @@ class MainActivity : ComponentActivity() {
 
                 BackHandler(
                     enabled = state.customFullscreenView != null ||
-                            state.isTabSwitcherOpen ||
                             state.isSearchOpen ||
+                            state.isTabSwitcherOpen ||
                             state.isMenuOpen ||
                             state.activeTab.canGoBack
                 ) {
                     when {
                         state.customFullscreenView != null -> viewModel.closeFullscreen()
-                        state.isTabSwitcherOpen -> viewModel.setTabSwitcherOpen(false)
                         state.isSearchOpen -> viewModel.setSearchOpen(false)
+                        state.isTabSwitcherOpen -> viewModel.setTabSwitcherOpen(false)
                         state.isMenuOpen -> viewModel.setMenuOpen(false)
                         state.activeTab.canGoBack -> viewModel.goBack()
                     }
@@ -94,14 +99,22 @@ class MainActivity : ComponentActivity() {
                                 .navigationBarsPadding()
                         )
 
-                        if (state.isTabSwitcherOpen) {
+                        AnimatedVisibility(
+                            visible = state.isTabSwitcherOpen,
+                            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 4 }),
+                            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 4 })
+                        ) {
                             TabSwitcher(
                                 state = state,
                                 viewModel = viewModel
                             )
                         }
 
-                        if (state.isSearchOpen) {
+                        AnimatedVisibility(
+                            visible = state.isSearchOpen,
+                            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+                        ) {
                             SearchModal(
                                 initialQuery = state.activeTab.url,
                                 viewModel = viewModel

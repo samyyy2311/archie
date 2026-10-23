@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -51,7 +52,9 @@ import `in`.caffeinelabs.archie.ui.state.BrowserState
 import `in`.caffeinelabs.archie.ui.state.BrowserViewModel
 import `in`.caffeinelabs.archie.ui.theme.ArchieBlue
 import `in`.caffeinelabs.archie.ui.theme.ArchieBorder
+import `in`.caffeinelabs.archie.ui.theme.ArchieDarkBg
 import `in`.caffeinelabs.archie.ui.theme.ArchieDarkPill
+import `in`.caffeinelabs.archie.ui.theme.ArchieDarkSurface
 import `in`.caffeinelabs.archie.ui.theme.ArchieTextMuted
 import `in`.caffeinelabs.archie.ui.theme.ArchieTextPrimary
 import `in`.caffeinelabs.archie.util.UrlSanitizer
@@ -76,7 +79,7 @@ fun BottomOmnibox(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box {
@@ -84,11 +87,11 @@ fun BottomOmnibox(
                     expanded = state.isMenuOpen,
                     onDismissRequest = { viewModel.setMenuOpen(false) },
                     modifier = Modifier
-                        .background(ArchieDarkPill)
-                        .border(1.dp, ArchieBorder, RoundedCornerShape(12.dp))
+                        .background(ArchieDarkSurface)
+                        .border(1.dp, ArchieBorder, RoundedCornerShape(14.dp))
                 ) {
                     DropdownMenuItem(
-                        text = { Text("New Tab", color = ArchieTextPrimary) },
+                        text = { Text("New Tab", color = ArchieTextPrimary, fontSize = 14.sp) },
                         leadingIcon = {
                             Icon(Icons.Outlined.Add, contentDescription = null, tint = ArchieTextMuted)
                         },
@@ -96,7 +99,7 @@ fun BottomOmnibox(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Reload", color = ArchieTextPrimary) },
+                        text = { Text("Reload", color = ArchieTextPrimary, fontSize = 14.sp) },
                         leadingIcon = {
                             Icon(Icons.Outlined.Refresh, contentDescription = null, tint = ArchieTextMuted)
                         },
@@ -104,7 +107,7 @@ fun BottomOmnibox(
                     )
 
                     DropdownMenuItem(
-                        text = { Text("Share Link", color = ArchieTextPrimary) },
+                        text = { Text("Share Link", color = ArchieTextPrimary, fontSize = 14.sp) },
                         leadingIcon = {
                             Icon(Icons.Outlined.Share, contentDescription = null, tint = ArchieTextMuted)
                         },
@@ -124,7 +127,8 @@ fun BottomOmnibox(
                         text = {
                             Text(
                                 if (activeTab.isDesktopMode) "Request Mobile Site" else "Request Desktop Site",
-                                color = if (activeTab.isDesktopMode) ArchieBlue else ArchieTextPrimary
+                                color = if (activeTab.isDesktopMode) ArchieBlue else ArchieTextPrimary,
+                                fontSize = 14.sp
                             )
                         },
                         leadingIcon = {
@@ -139,131 +143,103 @@ fun BottomOmnibox(
                 }
             }
 
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .shadow(elevation = 16.dp, shape = barShape, spotColor = Color.Black)
+                    .shadow(elevation = 12.dp, shape = barShape, spotColor = Color.Black)
                     .clip(barShape)
                     .background(ArchieDarkPill)
                     .border(width = 1.dp, color = ArchieBorder, shape = barShape)
-                    .padding(horizontal = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { viewModel.goBack() },
-                    enabled = activeTab.canGoBack,
-                    modifier = Modifier.size(38.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = "Back",
-                        tint = if (activeTab.canGoBack) ArchieTextPrimary else ArchieTextMuted.copy(alpha = 0.35f),
-                        modifier = Modifier.size(20.dp)
+                if (activeTab.isLoading) {
+                    val progressFloat = (activeTab.loadingProgress.coerceIn(0, 100)) / 100f
+                    LinearProgressIndicator(
+                        progress = { progressFloat },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.5.dp)
+                            .align(Alignment.TopCenter),
+                        color = ArchieBlue,
+                        trackColor = Color.Transparent
                     )
                 }
 
-                IconButton(
-                    onClick = { viewModel.goForward() },
-                    enabled = activeTab.canGoForward,
-                    modifier = Modifier.size(38.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                        contentDescription = "Forward",
-                        tint = if (activeTab.canGoForward) ArchieTextPrimary else ArchieTextMuted.copy(alpha = 0.35f),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                val pillShape = RoundedCornerShape(20.dp)
-
-                Box(
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(42.dp)
-                        .clip(pillShape)
-                        .background(Color(0xFF141519))
-                        .border(1.dp, ArchieBorder, pillShape)
-                        .clickable { viewModel.setSearchOpen(true) }
-                        .padding(horizontal = 12.dp)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(horizontal = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center
+                    TabStackIcon(
+                        tabCount = state.tabs.size,
+                        onClick = { viewModel.setTabSwitcherOpen(true) }
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    val pillShape = RoundedCornerShape(22.dp)
+                    val displayDomain = UrlSanitizer.extractDisplayDomain(activeTab.url)
+                    val isHttps = activeTab.url.startsWith("https://", ignoreCase = true)
+
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .clip(pillShape)
+                            .background(ArchieDarkBg)
+                            .border(1.dp, ArchieBorder, pillShape)
+                            .clickable { viewModel.setSearchOpen(true) }
+                            .padding(horizontal = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val isHttps = activeTab.url.startsWith("https://", ignoreCase = true)
-                            Icon(
-                                imageVector = Icons.Outlined.Lock,
-                                contentDescription = if (isHttps) "Secure connection" else "Connection info",
-                                tint = if (isHttps) ArchieTextMuted else Color(0xFFFF9500),
-                                modifier = Modifier.size(14.dp)
-                            )
+                        Icon(
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = if (isHttps) "Secure connection" else "Insecure connection",
+                            tint = if (isHttps) ArchieTextMuted else Color(0xFFFF9500),
+                            modifier = Modifier.size(13.dp)
+                        )
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                            val displayDomain = UrlSanitizer.extractDisplayDomain(activeTab.url)
-                            val label = if (displayDomain.isNotBlank()) displayDomain else "Search or type URL"
-
-                            Text(
-                                text = label,
-                                color = if (displayDomain.isNotBlank()) ArchieTextPrimary else ArchieTextMuted,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-
-                        if (activeTab.isLoading) {
-                            val progressFloat = (activeTab.loadingProgress.coerceIn(0, 100)) / 100f
-                            LinearProgressIndicator(
-                                progress = { progressFloat },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(2.dp),
-                                color = ArchieBlue,
-                                trackColor = Color.Transparent
-                            )
-                        }
+                        Text(
+                            text = if (displayDomain.isNotBlank()) displayDomain else "Search or enter URL",
+                            color = if (displayDomain.isNotBlank()) ArchieTextPrimary else ArchieTextMuted,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
-                }
 
-                Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(1.5.dp, ArchieBorder, RoundedCornerShape(8.dp))
-                        .clickable { viewModel.setTabSwitcherOpen(true) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "${state.tabs.size}",
-                        color = ArchieTextPrimary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    IconButton(
+                        onClick = { viewModel.goBack() },
+                        enabled = activeTab.canGoBack,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = "Back",
+                            tint = if (activeTab.canGoBack) ArchieTextPrimary else ArchieTextMuted.copy(alpha = 0.35f),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
 
-                IconButton(
-                    onClick = { viewModel.setMenuOpen(!state.isMenuOpen) },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.MoreVert,
-                        contentDescription = "Menu",
-                        tint = ArchieTextMuted,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    IconButton(
+                        onClick = { viewModel.setMenuOpen(!state.isMenuOpen) },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = "Menu",
+                            tint = ArchieTextMuted,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

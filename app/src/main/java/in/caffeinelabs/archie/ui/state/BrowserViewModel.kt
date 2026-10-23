@@ -274,8 +274,12 @@ class BrowserViewModel : ViewModel() {
         }
     }
 
-    fun loadUrl(input: String) {
-        val resolved = UrlSanitizer.resolveQuery(input)
+    fun setBrowseForMe(enabled: Boolean) {
+        _state.update { it.copy(isBrowseForMe = enabled) }
+    }
+
+    fun loadUrl(input: String, browseForMe: Boolean = false) {
+        val resolved = UrlSanitizer.resolveQuery(input, browseForMe = browseForMe)
         val cleaned = UrlSanitizer.cleanUrl(resolved)
         val activeId = _state.value.activeTabId
 
@@ -283,7 +287,7 @@ class BrowserViewModel : ViewModel() {
             val updatedTabs = current.tabs.map {
                 if (it.id == activeId) it.copy(url = cleaned) else it
             }
-            current.copy(tabs = updatedTabs, isSearchOpen = false, isMenuOpen = false)
+            current.copy(tabs = updatedTabs, isSearchOpen = false, isMenuOpen = false, isBrowseForMe = browseForMe)
         }
 
         webViewPool[activeId]?.loadUrl(cleaned) ?: viewModelScope.launch {
