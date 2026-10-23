@@ -71,7 +71,7 @@ fun SearchModal(
     viewModel: BrowserViewModel,
     modifier: Modifier = Modifier
 ) {
-    var textFieldValue by remember {
+    var textFieldValue by remember(initialQuery) {
         mutableStateOf(
             TextFieldValue(
                 text = initialQuery,
